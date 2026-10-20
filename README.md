@@ -58,12 +58,17 @@ erDiagram
     users ||--o{ vehicles : "registers (1:N)"
     users ||--o{ stations : "operates (1:N)"
     users ||--o{ bookings : "reserves (1:N)"
+
     stations ||--|{ chargers : "houses (1:N)"
     stations ||--|{ tariffs : "configures (1:N)"
+
     chargers ||--o{ charger_maintenance_logs : "identifies (1:N weak)"
+
     vehicles ||--o{ bookings : "allocated (1:N)"
     chargers ||--o{ bookings : "assigned (1:N)"
+
     bookings ||--o| charging_sessions : "dispenses (1:0..1)"
+
     users {
         int user_id PK
         varchar name
