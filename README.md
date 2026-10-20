@@ -45,116 +45,123 @@ users (Customers, Station Owners, Admins)
 ├── vehicles (Customer EV Fleet)
 │
 ├── stations (Physical Charging Hubs)
-│   ├── chargers (Charging Bays / Dispensers)
-│   │   └── charger_maintenance_logs [WEAK ENTITY] (Service & Repair Logs)
-│   └── tariffs (Peak & Off-Peak Rate Schedules)
+│   ├── chargers (Charging Bays / Dispensers)
+│   │   └── charger_maintenance_logs [WEAK ENTITY] (Service & Repair Logs)
+│   └── tariffs (Peak & Off-Peak Rate Schedules)
 │
 └── bookings (Slot Reservations)
-    └── charging_sessions (Energy Dispensed & Billing Ledger)
+    └── charging_sessions (Energy Dispensed & Billing Ledger)
 ```
 
 ```mermaid
 erDiagram
-    users ||--o{ vehicles : "registers (1:N)"
-    users ||--o{ stations : "operates (1:N)"
-    users ||--o{ bookings : "reserves (1:N)"
+    users ||--o{ vehicles : "registers (1:N)"
+    users ||--o{ stations : "operates (1:N)"
+    users ||--o{ bookings : "reserves (1:N)"
+    
+    stations ||--|{ chargers : "houses (1:N)"
+    stations ||--|{ tariffs : "configures (1:N)"
+    
+    chargers ||--o{ charger_maintenance_logs : "identifies (1:N weak)"
+    
+    vehicles ||--o{ bookings : "allocated (1:N)"
+    chargers ||--o{ bookings : "assigned (1:N)"
+    
+    bookings ||--o| charging_sessions : "dispenses (1:0..1)"
 
-    stations ||--|{ chargers : "houses (1:N)"
-    stations ||--|{ tariffs : "configures (1:N)"
+    users {
+        int user_id PK
+        varchar name
+        varchar email UK
+        varchar phone
+        enum role
+        enum status
+        timestamp created_at
+    }
 
-    chargers ||--o{ charger_maintenance_logs : "identifies (1:N weak)"
+    vehicles {
+        int vehicle_id PK
+        int user_id FK
+        varchar vehicle_number UK
+        varchar brand
+        varchar model
+        decimal battery_capacity_kwh
+        enum connector_type
+        timestamp created_at
+    }
 
-    vehicles ||--o{ bookings : "allocated (1:N)"
-    chargers ||--o{ bookings : "assigned (1:N)"
+    stations {
+        int station_id PK
+        int owner_id FK
+        varchar station_name
+        varchar address
+        varchar city
+        varchar state
+        decimal latitude
+        decimal longitude
+        enum status
+        timestamp created_at
+    }
 
-    bookings ||--o| charging_sessions : "dispenses (1:0..1)"
+    chargers {
+        int charger_id PK
+        int station_id FK
+        varchar charger_number
+        enum charger_type
+        decimal power_kw
+        enum status
+        timestamp created_at
+    }
 
-    users {
-        int user_id PK
-        varchar name
-        varchar email UK
-        varchar phone
-        enum role
-        enum status
-        timestamp created_at
-    }
-    vehicles {
-        int vehicle_id PK
-        int user_id FK
-        varchar vehicle_number UK
-        varchar brand
-        varchar model
-        decimal battery_capacity_kwh
-        enum connector_type
-        timestamp created_at
-    }
-    stations {
-        int station_id PK
-        int owner_id FK
-        varchar station_name
-        varchar address
-        varchar city
-        varchar state
-        decimal latitude
-        decimal longitude
-        enum status
-        timestamp created_at
-    }
-    chargers {
-        int charger_id PK
-        int station_id FK
-        varchar charger_number
-        enum charger_type
-        decimal power_kw
-        enum status
-        timestamp created_at
-    }
-    tariffs {
-        int tariff_id PK
-        int station_id FK
-        enum charger_type
-        decimal peak_price_per_kwh
-        decimal off_peak_price_per_kwh
-        time peak_start_time
-        time peak_end_time
-        date effective_from
-        date effective_to
-        enum status
-    }
-    bookings {
-        int booking_id PK
-        int user_id FK
-        int vehicle_id FK
-        int charger_id FK
-        datetime start_time
-        datetime end_time
-        enum status
-        timestamp created_at
-        datetime cancelled_at
-    }
-    charging_sessions {
-        int session_id PK
-        int booking_id FK,UK
-        datetime start_time
-        datetime end_time
-        decimal energy_consumed_kwh
-        decimal price_per_kwh
-        enum pricing_period
-        decimal total_cost
-        enum status
-        timestamp created_at
-    }
-    charger_maintenance_logs {
-        int charger_id PK,FK
-        int log_seq PK
-        date maintenance_date
-        enum issue_type
-        varchar description
-        varchar technician_name
-        decimal cost
-        enum status
-        timestamp created_at
-    }
+    tariffs {
+        int tariff_id PK
+        int station_id FK
+        enum charger_type
+        decimal peak_price_per_kwh
+        decimal off_peak_price_per_kwh
+        time peak_start_time
+        time peak_end_time
+        date effective_from
+        date effective_to
+        enum status
+    }
+
+    bookings {
+        int booking_id PK
+        int user_id FK
+        int vehicle_id FK
+        int charger_id FK
+        datetime start_time
+        datetime end_time
+        enum status
+        timestamp created_at
+        datetime cancelled_at
+    }
+
+    charging_sessions {
+        int session_id PK
+        int booking_id FK,UK
+        datetime start_time
+        datetime end_time
+        decimal energy_consumed_kwh
+        decimal price_per_kwh
+        enum pricing_period
+        decimal total_cost
+        enum status
+        timestamp created_at
+    }
+
+    charger_maintenance_logs {
+        int charger_id PK,FK
+        int log_seq PK
+        date maintenance_date
+        enum issue_type
+        varchar description
+        varchar technician_name
+        decimal cost
+        enum status
+        timestamp created_at
+    }
 ```
 
 ---
